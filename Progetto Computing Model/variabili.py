@@ -1,0 +1,16 @@
+coda1=[] #Elementi iniziali nella coda
+coda2=[]
+N1=0
+N2=0
+V_Lambda=0.625 #in media arriva una richiesta ogni 1.6 minuti
+Durata_Media_Del_Serviziop_N1=0.5 #in media le richieste di tipo 1 vengono svolte in questo tempo
+Durata_Media_Del_Serviziop_N2=1.5 #le richieste di tipo due vengono svolte con tempo maggiore
+tempo=0  #poniamo il tempo allo stato iniziale a 0
+arrivi_N1=0
+arrivi_N2=0
+scartati_N1=0
+scartati_N2=0
+completati_N1=0
+completati_N2=0
+
+
