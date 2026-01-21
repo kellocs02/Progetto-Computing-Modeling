@@ -12,5 +12,9 @@ scartati_N1=0
 scartati_N2=0
 completati_N1=0
 completati_N2=0
+tempo_fine_servizio=0
+tempo_arrivo=0
+prossimo_arrivo=0
+stato=0  #se 1 il server sta eseguendo un servizio della coda 1, altrimenti se è 2 il server sta eseguendo un servizio della coda 2
 
 
