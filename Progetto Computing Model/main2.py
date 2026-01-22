@@ -20,22 +20,29 @@ def Poisson():
 def EsecuzioneDelServizio1():
     variabili2.coda1.pop(0)
     variabili2.N1-=1 #decrementiamo il valore della coda
+    variabili2.completati_N1+=1
+    variabili2.fine_occupato=variabili2.tempo
 
 def EsecuzioneDelServizio2():
     variabili2.coda2.pop(0)
     variabili2.N2-=1
+    variabili2.completati_N2+=1
+    variabili2.fine_occupato=variabili2.tempo
+
 
 def GenerazioneTempoServizio1():
     print("Generazione del tempo di servizio per la richiesta nella coda 1\n")
     tempo_servizio_1 = -math.log(1 - random.random()) / variabili2.Durata_Media_Del_Serviziop_N1 #decidiamo quanto durerà l'esecuzione del servizio in base al dato fornito
     variabili2.tempo_fine_servizio=tempo_servizio_1+variabili2.tempo
     variabili2.stato=1
+    variabili2.inizio_occupato=variabili2.tempo
 
 def GenerazioneTempoServizio2():
     print("Generazione del tempo di servizio per la richiesta nella coda 2\n")
     tempo_servizio_2 = -math.log(1 - random.random()) / variabili2.Durata_Media_Del_Serviziop_N2
     variabili2.tempo_fine_servizio=tempo_servizio_2+variabili2.tempo
     variabili2.stato=2
+    variabili2.inizio_occupato=variabili2.tempo
 
 def EstrazioneCasuale():
     if random.random() <=0.50:
@@ -58,8 +65,6 @@ def main():
         delta_t = Poisson()
         print("delta-T Inizio while : ",delta_t)
         variabili2.prossimo_arrivo=variabili2.tempo+delta_t #calcoliamo quando arriverà la prossima richiesta
-        #variabili2.coda_arrivi[variabili2.indice_arrivi] #riempiamo la coda con i tempi dei prossimia arrivi
-        #variabili2.indice_arrivi+=1
         print("prossimo_arrivo : ",variabili2.prossimo_arrivo)
         print("tempo fine servizio : ", variabili2.tempo_fine_servizio)
         if(variabili2.prossimo_arrivo < variabili2.tempo_fine_servizio or variabili2.tempo_fine_servizio==0):#verifichiamo quale evento si svolgerà prima 
@@ -98,24 +103,32 @@ def main():
                 print("siamo in esecuzione servizio 1")
                 EsecuzioneDelServizio1()
                 variabili2.tempo=variabili2.tempo_fine_servizio #il tempo nel sistema va avanti
-                variabili2.tempo_fine_servizio=0
+                variabili2.tempo_fine_servizio=0#variabile della funzione rimessa a 0
                 variabili2.stato=0 #server libero
+                variabili2.tempo_server_occupato=variabili2.tempo_server_occupato+(variabili2.fine_occupato-variabili2.inizio_occupato)
             else:
                 print("siamo in esecuzione servizio 2")
                 EsecuzioneDelServizio2()
                 variabili2.tempo=variabili2.tempo_fine_servizio #il tempo nel sistema va avanti
                 variabili2.tempo_fine_servizio=0
                 variabili2.stato=0 #server libero
+                variabili2.tempo_server_occupato=variabili2.tempo_server_occupato+(variabili2.fine_occupato-variabili2.inizio_occupato)
             #dopo aver eseguito il servizio, se vi sono altre richieste in coda, il server avvia un nuovo job
             if(variabili2.N1+variabili2.N2!=0): #dopo aver finito l'ultimo servizio il server verifica se vi siano altre richieste in coda e in caso genera il nuovo job
                 EsecuzioneCasualeCode()
         i+=1
         print("i-> ", i)
     print("Elaborazione completata...Dati prodotti:\n")
+    print("Throughput: ",(variabili2.completati_N1+variabili2.completati_N2)/variabili2.tempo)
     print("Richieste arrivate di tipo 1: ",variabili2.arrivi_N1)
     print("Richieste arrivate di tipo 2: ",variabili2.arrivi_N2)
     print("Richieste scartate di tipo 1: ",variabili2.scartati_N1)
     print("Richieste scartate di tipo 2: ",variabili2.scartati_N2)
+    print("Loss rate tipo 1: ",variabili2.scartati_N1/variabili2.arrivi_N1)
+    print("Loss rate tipo 2: ",variabili2.scartati_N2/variabili2.arrivi_N2)
+    print("Loss rate totale: ",(variabili2.scartati_N1+variabili2.scartati_N2)/(variabili2.arrivi_N1+variabili2.arrivi_N2))
+    print("Tempo server occupato : ", variabili2.tempo_server_occupato)
+    print("tempo totale simulazione: ",variabili2.tempo)
 
 
 

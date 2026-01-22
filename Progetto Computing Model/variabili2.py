@@ -18,3 +18,6 @@ tempo_fine_servizio=0
 tempo_arrivo=0
 prossimo_arrivo=0
 stato=0  #se 1 il server sta eseguendo un servizio della coda 1, altrimenti se è 2 il server sta eseguendo un servizio della coda 2
+tempo_server_occupato=0
+inizio_occupato=0
+fine_occupato=0
