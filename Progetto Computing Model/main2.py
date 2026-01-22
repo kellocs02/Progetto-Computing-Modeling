@@ -11,6 +11,9 @@ import time
 # in questo modo la prossima richiesta arriva a (t+Delta_T)
 #Con un processo di Poisson non genero arrivi,
 #genero tempi di attesa tra un arrivo e il successivo.
+
+#prova progetto 2 bisogna implementare la coda di arrivi
+#
 def Poisson():
     return  -math.log(1 - random.random()) / variabili2.V_Lambda
 
@@ -50,11 +53,13 @@ def EsecuzioneCasualeCode():
 
 def main():
     print("Progetto Computing Modeling / Professor. Scarpa / Studente Alberto Paludetti")
-    i=0
-    delta_t = Poisson() #Generiamo la prima richiesta in arrivo (Quando arriverà)
-    while(i<10):
+    i=0 #Generiamo la prima richiesta in arrivo (Quando arriverà)
+    while(i<100000):
+        delta_t = Poisson()
         print("delta-T Inizio while : ",delta_t)
         variabili2.prossimo_arrivo=variabili2.tempo+delta_t #calcoliamo quando arriverà la prossima richiesta
+        #variabili2.coda_arrivi[variabili2.indice_arrivi] #riempiamo la coda con i tempi dei prossimia arrivi
+        #variabili2.indice_arrivi+=1
         print("prossimo_arrivo : ",variabili2.prossimo_arrivo)
         print("tempo fine servizio : ", variabili2.tempo_fine_servizio)
         if(variabili2.prossimo_arrivo < variabili2.tempo_fine_servizio or variabili2.tempo_fine_servizio==0):#verifichiamo quale evento si svolgerà prima 
@@ -64,11 +69,10 @@ def main():
             if(tipo_Di_richiesta<=0.75):
                 print("Richiesta di tipo 2,\nControllo Spazio nella coda\n")
                 variabili2.arrivi_N2+=1 #aumentiamo il valore di arrivi che tiene il conto del numero di richieste arrivate nel sistema
-                if(variabili2.N2<12):
+                if(variabili2.N2<12):   
                     print("Spazio disponibile, aggiunta della richiesta nella coda N2")
                     variabili2.coda2.append(variabili2.tempo)
-                    print(variabili2.coda2[0])
-                    time.sleep(5)
+                    print(variabili2.coda2[-1])
                     variabili2.N2+=1
                 else:
                     print("Spazio esaurito, richiesta scartata")
@@ -88,25 +92,30 @@ def main():
                 EsecuzioneCasualeCode()
             else:
                 print("Server Occupato\n")
-            i+=1
-            delta_t=Poisson() #generiamo il tempo dell'arrivo della prossima richiesta
-            print("siamo dopo il secondo delta\n")
         else:
             #caso in cui dobbiamo gestire l'evento per la fine del servizio
             if(variabili2.stato==1):
                 print("siamo in esecuzione servizio 1")
                 EsecuzioneDelServizio1()
                 variabili2.tempo=variabili2.tempo_fine_servizio #il tempo nel sistema va avanti
+                variabili2.tempo_fine_servizio=0
                 variabili2.stato=0 #server libero
             else:
                 print("siamo in esecuzione servizio 2")
                 EsecuzioneDelServizio2()
                 variabili2.tempo=variabili2.tempo_fine_servizio #il tempo nel sistema va avanti
+                variabili2.tempo_fine_servizio=0
                 variabili2.stato=0 #server libero
-            #Dopo aver eseguito il servizio, se vi sono altre richieste in coda, il server avvia un nuovo job
+            #dopo aver eseguito il servizio, se vi sono altre richieste in coda, il server avvia un nuovo job
             if(variabili2.N1+variabili2.N2!=0): #dopo aver finito l'ultimo servizio il server verifica se vi siano altre richieste in coda e in caso genera il nuovo job
-                print("siamo in esecuzione casuale code 2")
                 EsecuzioneCasualeCode()
+        i+=1
+        print("i-> ", i)
+    print("Elaborazione completata...Dati prodotti:\n")
+    print("Richieste arrivate di tipo 1: ",variabili2.arrivi_N1)
+    print("Richieste arrivate di tipo 2: ",variabili2.arrivi_N2)
+    print("Richieste scartate di tipo 1: ",variabili2.scartati_N1)
+    print("Richieste scartate di tipo 2: ",variabili2.scartati_N2)
 
 
 
