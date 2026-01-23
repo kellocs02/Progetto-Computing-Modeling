@@ -1,7 +1,6 @@
 import random  #random restituisce un numero casuale tra 0 e 1
 import math
 import variabili2
-import time
 #Fase 1 implementare Poisson
 #il tempo medio tra due arrivi è di 1.6 minuti, gli intervalli di tempo
 #tra due arrivi consecutivi sono casuali, indipendenti, distribuiti in modo esponenziale
@@ -148,7 +147,14 @@ def main():
 
     for k in range(len(variabili2.area_coda2)):
         print(f"Coda 2 - k={k}: {variabili2.area_coda2[k] / variabili2.tempo}")
-    print("tempo medio di risposta : ")
+    L = variabili2.area / variabili2.tempo
+    throughput = (variabili2.completati_N1 + variabili2.completati_N2) / variabili2.tempo
+    tempo_medio_risposta = L / throughput
+
+    print("tempo medio di risposta : ", tempo_medio_risposta)
+    input("premi invio per continuare e visualizzare le metriche valutate con M/M/1\n")
+
+    
 
 
 
