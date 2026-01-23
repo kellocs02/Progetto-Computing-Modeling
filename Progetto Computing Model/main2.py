@@ -68,7 +68,12 @@ def main():
         print("prossimo_arrivo : ",variabili2.prossimo_arrivo)
         print("tempo fine servizio : ", variabili2.tempo_fine_servizio)
         if(variabili2.prossimo_arrivo < variabili2.tempo_fine_servizio or variabili2.tempo_fine_servizio==0):#verifichiamo quale evento si svolgerà prima 
+            variabili2.tempo_precedente=variabili2.tempo #salviamo il tempo dell'ultimo evento
             variabili2.tempo=variabili2.prossimo_arrivo #aumentiamo il tempo del sistema
+            variabili2.area+=(variabili2.N1+variabili2.N2+(1 if variabili2.stato !=0 else 0)) * (variabili2.tempo-variabili2.tempo_precedente) 
+            print("N1-> ",variabili2.N1)
+            variabili2.area_coda1[variabili2.N1-1]+=variabili2.tempo-variabili2.tempo_precedente
+            variabili2.area_coda2[variabili2.N2-1]+=variabili2.tempo-variabili2.tempo_precedente
             print("Arrivo di una nuova richiesta al tempo ", variabili2.tempo)
             tipo_Di_richiesta=random.random() #generiamo un numero casuale che utilizziamo per decidere di che tipo è la richiesta (sotto il 75 sarà di tipo 2, altrimenti di tipo 1)
             if(tipo_Di_richiesta<=0.75):
@@ -85,7 +90,7 @@ def main():
             else:
                 print("Richiesta di tipo 1,\nControllo Spazio nella coda\n")
                 variabili2.arrivi_N1+=1  #aumentiamo il valore di arrivi che tiene il conto del numero di richieste arrivate nel sistema
-                if(variabili2.N1<6):
+                if(variabili2.N1<5):
                     print("Spazio Disponibile, aggiunta della richiesta nella coda N1")
                     variabili2.coda1.append(variabili2.tempo)
                     variabili2.N1+=1
@@ -102,16 +107,24 @@ def main():
             if(variabili2.stato==1):
                 print("siamo in esecuzione servizio 1")
                 EsecuzioneDelServizio1()
+                variabili2.tempo_precedente=variabili2.tempo #salviamo il tempo dell'ultimo evento
                 variabili2.tempo=variabili2.tempo_fine_servizio #il tempo nel sistema va avanti
                 variabili2.tempo_fine_servizio=0#variabile della funzione rimessa a 0
                 variabili2.stato=0 #server libero
+                variabili2.area+=(variabili2.N1+variabili2.N2+(1 if variabili2.stato !=0 else 0)) * (variabili2.tempo-variabili2.tempo_precedente)
+                variabili2.area_coda1[variabili2.N1-1]+=variabili2.tempo-variabili2.tempo_precedente
+                variabili2.area_coda2[variabili2.N2-1]+=variabili2.tempo-variabili2.tempo_precedente
                 variabili2.tempo_server_occupato=variabili2.tempo_server_occupato+(variabili2.fine_occupato-variabili2.inizio_occupato)
             else:
                 print("siamo in esecuzione servizio 2")
                 EsecuzioneDelServizio2()
+                variabili2.tempo_precedente=variabili2.tempo #salviamo il tempo dell'ultimo evento
                 variabili2.tempo=variabili2.tempo_fine_servizio #il tempo nel sistema va avanti
                 variabili2.tempo_fine_servizio=0
                 variabili2.stato=0 #server libero
+                variabili2.area+=(variabili2.N1+variabili2.N2+(1 if variabili2.stato !=0 else 0)) * (variabili2.tempo-variabili2.tempo_precedente)
+                variabili2.area_coda1[variabili2.N1-1]+=variabili2.tempo-variabili2.tempo_precedente
+                variabili2.area_coda2[variabili2.N2-1]+=variabili2.tempo-variabili2.tempo_precedente
                 variabili2.tempo_server_occupato=variabili2.tempo_server_occupato+(variabili2.fine_occupato-variabili2.inizio_occupato)
             #dopo aver eseguito il servizio, se vi sono altre richieste in coda, il server avvia un nuovo job
             if(variabili2.N1+variabili2.N2!=0): #dopo aver finito l'ultimo servizio il server verifica se vi siano altre richieste in coda e in caso genera il nuovo job
@@ -129,6 +142,14 @@ def main():
     print("Loss rate totale: ",(variabili2.scartati_N1+variabili2.scartati_N2)/(variabili2.arrivi_N1+variabili2.arrivi_N2))
     print("Tempo server occupato : ", variabili2.tempo_server_occupato)
     print("tempo totale simulazione: ",variabili2.tempo)
+    print("numero di richieste medio nel sistema: ",variabili2.area/variabili2.tempo)
+    for k in range(len(variabili2.area_coda1)):
+        print(f"Coda 1 - k={k}: {variabili2.area_coda1[k] / variabili2.tempo}")
+
+    for k in range(len(variabili2.area_coda2)):
+        print(f"Coda 2 - k={k}: {variabili2.area_coda2[k] / variabili2.tempo}")
+    print("tempo medio di risposta : ")
+
 
 
 

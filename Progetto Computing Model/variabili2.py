@@ -21,3 +21,11 @@ stato=0  #se 1 il server sta eseguendo un servizio della coda 1, altrimenti se Ã
 tempo_server_occupato=0
 inizio_occupato=0
 fine_occupato=0
+
+#usate per calcolare il numero medio di richieste nel sistema
+area=0
+tempo_precedente=0
+
+#usate per calcolare la distribuzione delle richieste in attesa nelle code
+area_coda1=[0]*5
+area_coda2=[0]*12
