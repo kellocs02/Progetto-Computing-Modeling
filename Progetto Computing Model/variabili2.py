@@ -1,3 +1,6 @@
+dizionario_valori_1={}
+dizionario_valori_2={}
+priorità=0  #0 casuale, 1 priorità coda 1
 coda_arrivi=[]
 indice_arrivi=0
 coda1=[] #Elementi iniziali nella coda
