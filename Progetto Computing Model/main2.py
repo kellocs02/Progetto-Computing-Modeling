@@ -24,7 +24,7 @@ def Calcolo_Metriche(arrivi1, arrivi2, tempoSimulazione):
     def mm1k(lambda_, mu, K):
         rho = lambda_ / mu  #fattore utilizzo server, rapporto tra arrivi e servizi
         if rho != 1: #probabilità coda vuota
-            P0 = (1 - rho) / (1 - rho**(K + 1))
+            P0 = (1 - rho) / (1 - rho**(K + 1)) #probabilità sistema vuoto vuoto
         else:
             P0 = 1 / (K + 1)
         Pn = [P0 * rho**n for n in range(K + 1)] #lista delle probabilità di avere n clienti in coda
@@ -48,10 +48,10 @@ def Calcolo_Metriche(arrivi1, arrivi2, tempoSimulazione):
     metriche2 = mm1k(lambda2, mu2, K2)
     throughput_totale = metriche1["throughput"] + metriche2["throughput"]
     L_totale = metriche1["L"] + metriche2["L"]
-    if throughput_totale > 0:
+    if throughput_totale > 0: #legge di little
         W_totale = L_totale / throughput_totale
     else:
-        W_totale = 0
+        W_totale = 0 #nessuna richiesta servita, evita la divisione per 0
 
 
     return {
@@ -82,14 +82,14 @@ def reset_variabili():
     variabili2.area_coda2 = [0]*12
     variabili2.tempo_server_occupato = 0
 
-def Poisson():
-    return  -math.log(1 - random.random()) / variabili2.V_Lambda
+def Esponenziale():
+    return  -math.log(1 - random.random()) / variabili2.V_Lambda #produce un valore casuale che segue la distr. esp
 
 def EsecuzioneDelServizio1():
-    variabili2.coda1.pop(0)
+    variabili2.coda1.pop(0) #elimino la richiesta dalla coda
     variabili2.N1-=1 #decrementiamo il valore della coda
-    variabili2.completati_N1+=1
-    variabili2.fine_occupato=variabili2.tempo
+    variabili2.completati_N1+=1 #aumento completati
+    variabili2.fine_occupato=variabili2.tempo #salvo il valore temporale della fine del servizio
 
 def EsecuzioneDelServizio2():
     variabili2.coda2.pop(0)
@@ -101,9 +101,9 @@ def EsecuzioneDelServizio2():
 def GenerazioneTempoServizio1():
     print("Generazione del tempo di servizio per la richiesta nella coda 1\n")
     tempo_servizio_1 = -math.log(1 - random.random()) / variabili2.Durata_Media_Del_Serviziop_N1 #decidiamo quanto durerà l'esecuzione del servizio in base al dato fornito
-    variabili2.tempo_fine_servizio=tempo_servizio_1+variabili2.tempo
-    variabili2.stato=1
-    variabili2.inizio_occupato=variabili2.tempo
+    variabili2.tempo_fine_servizio=tempo_servizio_1+variabili2.tempo #calcolo il tempo di fine servizo
+    variabili2.stato=1 #sistema sta servendo richiesta di tipo 1
+    variabili2.inizio_occupato=variabili2.tempo #tempo in cui il server inzia il servizio, mi serve per calcolare tempo_server_occupato
 
 def GenerazioneTempoServizio2():
     print("Generazione del tempo di servizio per la richiesta nella coda 2\n")
@@ -119,7 +119,7 @@ def EstrazioneCasuale():
         else:
             GenerazioneTempoServizio2()
     else:
-        if variabili2.N1!=0:
+        if variabili2.N1!=0:  #se vi sono richieste in n1 vengono eseguite con priorità
             GenerazioneTempoServizio1()
         else:
             GenerazioneTempoServizio2()
@@ -137,7 +137,7 @@ def main():
     tempo_massimo=100000
     tempo_inziale_non_conteggiato=10000
     while(variabili2.tempo<tempo_massimo):
-        delta_t = Poisson()
+        delta_t = Esponenziale() #variabile usata per calcolare il tempo del prossimo arrivo
         print("delta-T Inizio while : ",delta_t)
         variabili2.prossimo_arrivo=variabili2.tempo+delta_t #calcoliamo quando arriverà la prossima richiesta
         print("prossimo_arrivo : ",variabili2.prossimo_arrivo)
@@ -145,10 +145,10 @@ def main():
         if(variabili2.prossimo_arrivo < variabili2.tempo_fine_servizio or variabili2.tempo_fine_servizio==0):#verifichiamo quale evento si svolgerà prima 
             variabili2.tempo_precedente=variabili2.tempo #salviamo il tempo dell'ultimo evento
             variabili2.tempo=variabili2.prossimo_arrivo #aumentiamo il tempo del sistema
-            variabili2.area+=(variabili2.N1+variabili2.N2+(1 if variabili2.stato !=0 else 0)) * (variabili2.tempo-variabili2.tempo_precedente) 
+            variabili2.area+=(variabili2.N1+variabili2.N2+(1 if variabili2.stato !=0 else 0)) * (variabili2.tempo-variabili2.tempo_precedente) #numero di richieste nel sistema nel tempo, numero medio di richieste
             print("N1-> ",variabili2.N1)
-            variabili2.area_coda1[variabili2.N1-1]+=variabili2.tempo-variabili2.tempo_precedente
-            variabili2.area_coda2[variabili2.N2-1]+=variabili2.tempo-variabili2.tempo_precedente
+            variabili2.area_coda1[variabili2.N1-1]+=variabili2.tempo-variabili2.tempo_precedente #accumula il tempo per il quale la coda 1 è rimasta con N1 richieste
+            variabili2.area_coda2[variabili2.N2-1]+=variabili2.tempo-variabili2.tempo_precedente #mi calcolo poi la distribuzione della lunghezza della coda
             print("Arrivo di una nuova richiesta al tempo ", variabili2.tempo)
             tipo_Di_richiesta=random.random() #generiamo un numero casuale che utilizziamo per decidere di che tipo è la richiesta (sotto il 75 sarà di tipo 2, altrimenti di tipo 1)
             if(tipo_Di_richiesta<=0.75):
@@ -172,7 +172,7 @@ def main():
                 else:
                     print("Spazio esaurito, richiesta scartata")
                     variabili2.scartati_N1+=1
-            if(variabili2.N1+variabili2.N2!=0 and variabili2.stato==0): #Forse implementare ciclo while
+            if(variabili2.N1+variabili2.N2!=0 and variabili2.stato==0): #controlla che vi siano richieste in coda e che il server non stia eseguendo una richiesta di già
                 print("entriamo in esecuzione casuale code")
                 EsecuzioneCasualeCode()
             else:
@@ -184,9 +184,9 @@ def main():
                 EsecuzioneDelServizio1()
                 variabili2.tempo_precedente=variabili2.tempo #salviamo il tempo dell'ultimo evento
                 variabili2.tempo=variabili2.tempo_fine_servizio #il tempo nel sistema va avanti
-                variabili2.tempo_fine_servizio=0#variabile della funzione rimessa a 0
+                variabili2.tempo_fine_servizio=0#variabile della funzione rimessa a 0 (non ci sono richieste in esecuzione)
                 variabili2.stato=0 #server libero
-                variabili2.area+=(variabili2.N1+variabili2.N2+(1 if variabili2.stato !=0 else 0)) * (variabili2.tempo-variabili2.tempo_precedente)
+                variabili2.area+=(variabili2.N1+variabili2.N2+(1 if variabili2.stato !=0 else 0)) * (variabili2.tempo-variabili2.tempo_precedente) #numero medio di richieste nel sistema
                 variabili2.area_coda1[variabili2.N1-1]+=variabili2.tempo-variabili2.tempo_precedente
                 variabili2.area_coda2[variabili2.N2-1]+=variabili2.tempo-variabili2.tempo_precedente
                 variabili2.tempo_server_occupato=variabili2.tempo_server_occupato+(variabili2.fine_occupato-variabili2.inizio_occupato)
@@ -221,16 +221,15 @@ def main():
     print("Tempo server occupato : ", variabili2.tempo_server_occupato)
     print("tempo totale simulazione: ",variabili2.tempo)
     print("tempo effettivo conteggiato: ", tempo_effettivo)
-    numero_di_richieste_medio_nel_sistema=variabili2.area/tempo_effettivo
+    numero_di_richieste_medio_nel_sistema=variabili2.area/tempo_effettivo 
     print("numero di richieste medio nel sistema: ",numero_di_richieste_medio_nel_sistema)
     for k in range(len(variabili2.area_coda1)):
         print(f"Coda 1 - k={k}: {variabili2.area_coda1[k] / tempo_effettivo}")
 
     for k in range(len(variabili2.area_coda2)):
         print(f"Coda 2 - k={k}: {variabili2.area_coda2[k] / tempo_effettivo}")
-    L = variabili2.area / variabili2.tempo
     throughput = (variabili2.completati_N1 + variabili2.completati_N2) / tempo_effettivo
-    tempo_medio_risposta = L / throughput
+    tempo_medio_risposta = numero_di_richieste_medio_nel_sistema / throughput #legge di little
 
     print("tempo medio di risposta : ", tempo_medio_risposta)
     if(variabili2.priorità==0):
@@ -244,9 +243,10 @@ def main():
             "loss_rate_tipo_2": loss_rate_tipo_2,
             "loss_rate_totale": loss_rate_totale,
             "tempo_server_occupato": variabili2.tempo_server_occupato,
+            "U": variabili2.tempo_server_occupato/tempo_effettivo,
             "tempo_totale": variabili2.tempo,
             "L_medio_sistema": numero_di_richieste_medio_nel_sistema,
-            "tempo_medio_risposta": tempo_medio_risposta
+            "tempo_medio_risposta W": tempo_medio_risposta
         }
     else:
         variabili2.dizionario_valori_2={
@@ -259,9 +259,10 @@ def main():
             "loss_rate_tipo_2": loss_rate_tipo_2,
             "loss_rate_totale": loss_rate_totale,
             "tempo_server_occupato": variabili2.tempo_server_occupato,
+            "U": variabili2.tempo_server_occupato/tempo_effettivo,
             "tempo_totale": variabili2.tempo,
             "L_medio_sistema": numero_di_richieste_medio_nel_sistema,
-            "tempo_medio_risposta": tempo_medio_risposta
+            "tempo_medio_risposta W": tempo_medio_risposta
         }
 
 
@@ -286,12 +287,14 @@ if __name__ == "__main__":
     risultati = Calcolo_Metriche(variabili2.dizionario_valori_1["arrivi_tipo_1"], variabili2.dizionario_valori_1["arrivi_tipo_2"], 100000)
     print("Coda 1")
     for k, v in risultati["Coda1"].items():
-        if k != "Pn":
+        if k != "Pn": #non stampa la lista delle probabilità
             print(f"{k}: {v:.5f}")
+
     print("\nCdoa2")
     for k, v in risultati["Coda2"].items():
         if k != "Pn":
             print(f"{k}: {v:.5f}")
+
     print("\nThroughput totale:", risultati["Throughput_totale"])
     print("Numero medio richieste totale:", risultati["L_totale"])
     print("Tempo medio di risposta totale:", risultati["W_totale"])
